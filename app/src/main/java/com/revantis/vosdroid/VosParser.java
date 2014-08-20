@@ -1,10 +1,13 @@
 package com.revantis.vosdroid;
+import android.util.Log;
+
 import java.io.*;
 import java.nio.ByteOrder;
 import java.util.*;
 
 /**
  * Created by ReVanTis on 2014/08/19.
+ * 本类主要用于将vos格式的文件中的信息提取出来，提供给游戏用于生成note和声音
  */
 public class VosParser
 {
@@ -26,15 +29,20 @@ public class VosParser
     }
     public InputStream is;
     public List<VosSegment> segments;
-    public String title;
+    public String title="empyt";
     private int title_lenth;
-    public String artist;
+    public String artist="empyt";
     private int artist_lenth;
-    public String author;
+	public String comment="empyt";
+	private int comment_lenth;
+    public String author="empyt";
     private int author_lenth;
-	int length;
+	int filesize;
     int header;
 	int pos;
+	int musictype;
+	int musictype_ex;
+	int timelength;
     public VosParser(InputStream in)
     {
 	    is=in;
@@ -69,7 +77,7 @@ public class VosParser
                     09 "Classical"
                     0a "Other"
                 9) XX，1字节，额外音乐类型。
-                10) XX XX XX XX 总时间长度，Big Endian int
+                10) XX XX XX XX 总时间长度，单位毫秒(ms)，Big Endian int
                 11) 1023字节00
         */
 
@@ -77,7 +85,7 @@ public class VosParser
         try
         {
 	        pos=0;
-	        length=is.available();
+	        filesize=is.available();
             pos+=is.read(intbuffer,0,4);
             header = byte2int(intbuffer);
             if(header!=3)
@@ -90,7 +98,6 @@ public class VosParser
                 if(this_segment.getname().compareTo("EOF")!=0)
                 {
 	                segments.add(this_segment);
-					continue;
                 }
 	            else
                 {
@@ -98,15 +105,77 @@ public class VosParser
 	                break;
                 }
             }
+	        //dealing with INF segment here
+	        byte[] length=new byte[1];
+	        byte[] infobuffer=new byte[255];
+
+
+	        //title info
+	        pos+=is.read(length,0,1);
+	        title_lenth=length[0];
+	        if(title_lenth!=0)
+	        {
+		        pos += is.read(infobuffer, 0, title_lenth);
+		        title = new String(infobuffer);
+		        title=title.trim();
+	        }
+	        //artist info
+	        pos+=is.read(length,0,1);
+	        artist_lenth=length[0];
+	        if(artist_lenth!=0)
+	        {
+		        pos += is.read(infobuffer, 0, artist_lenth);
+		        artist= new String(infobuffer);
+		        artist=artist.trim();
+	        }
+	        //comment
+	        pos+=is.read(length,0,1);
+	        comment_lenth=length[0];
+	        if(comment_lenth!=0)
+	        {
+		        pos += is.read(infobuffer, 0, comment_lenth);
+		        comment= new String(infobuffer);
+		        comment=comment.trim();
+	        }
+			//author
+	        pos+=is.read(length,0,1);
+	        author_lenth=length[0];
+	        if(author_lenth!=0)
+	        {
+		        pos += is.read(infobuffer, 0, author_lenth);
+		        author= new String(infobuffer);
+		        author=author.trim();
+	        }
+	        //music type
+	        pos+=is.read(length,0,1);
+	        musictype=length[0];
+
+	        //extended music type
+	        pos+=is.read(length,0,1);
+	        musictype_ex=length[0];
+
+	        //timelength
+	        pos+=is.read(intbuffer,0,4);
+	        timelength=byte2int(intbuffer);
+			//00*1023
+	        for(int i=0;i<1023;i++)
+	        {
+		        pos+=is.read(length,0,1);
+		        if(length[0]!=0)
+		        {
+			        throw new Exception("1023 00 segment, non zero detected at:"+pos);
+		        }
+	        }
+			/*
+            2.INF Segment 轨道信息
+            TODO：完成上一部分以后记得补全这里,参考分析处理这里。
+            */
+	        // channel info here
+
         }
         catch (Exception e)
         {
-
+			Log.e("parse:",e.getMessage());
         }
-
-        /*
-            2.INF Segment 轨道信息
-            TODO：完成上一部分以后记得补全这里。
-         */
     }
 }

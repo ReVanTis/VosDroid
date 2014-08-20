@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 
 /**
  * Created by ReVanTis on 2014/08/19.
+ * 本类用于记载vos文件内部分块的信息，记录的是原始的byte数据
  */
 public class VosSegment
 {
