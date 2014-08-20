@@ -1,3 +1,4 @@
+![Image text](http://raw.github.com/revantis/VosDroid/master/app/src/main/res/drawable-xhdpi/ic_launcher.png)
 VosDroid
 ========
 
