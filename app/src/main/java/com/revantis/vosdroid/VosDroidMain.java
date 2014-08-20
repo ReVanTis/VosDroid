@@ -31,23 +31,6 @@ public class VosDroidMain extends Activity {
 				    VosParser vosp=new VosParser(new FileInputStream(file));
 				    Log.i("init","sucess");
 				    vosp.Parse();
-				    Log.i("parsed","info:");
-				    Log.i("filesize:",vosp.filesize+" bytes");
-				    Iterator<VosSegment> it=vosp.segments.iterator();
-				    int i=0;
-				    while(it.hasNext())
-				    {
-						VosSegment vs=it.next();
-						Log.i("segment"+i+":",vs.getname()+" "+vs.getaddr());
-					    i++;
-				    }
-				    Log.i("title",vosp.title);
-				    Log.i("artist",vosp.artist);
-				    Log.i("comment",vosp.comment);
-				    Log.i("author",vosp.author);
-					Log.i("musictype",vosp.musictype+"");
-				    Log.i("musictype_ex",vosp.musictype_ex+"");
-				    Log.i("timelength",vosp.timelength+"");
 			    }
 			    catch (Exception e)
 			    {

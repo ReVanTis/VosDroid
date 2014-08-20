@@ -11,42 +11,30 @@ import java.util.*;
  */
 public class VosParser
 {
-    static public int byte2int(byte[] bytes )
-    {
-        //Big Endian Byte2Int Conversion
-	    //大端4byte转换为int
-        int rt;
-        if(bytes.length==4)
-        {
-	        rt = java.nio.ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
-            return rt;
-        }
-        else
-        {
-            return -1;
-        }
 
-    }
     public InputStream is;
     public List<VosSegment> segments;
+	public List<VosChannel> channels;
     public String title="empyt";
-    private int title_lenth;
+    private int title_length;
     public String artist="empyt";
-    private int artist_lenth;
+    private int artist_length;
 	public String comment="empyt";
-	private int comment_lenth;
+	private int comment_length;
     public String author="empyt";
-    private int author_lenth;
+    private int author_length;
 	int filesize;
     int header;
 	int pos;
 	int musictype;
 	int musictype_ex;
 	int timelength;
+	int level;
     public VosParser(InputStream in)
     {
 	    is=in;
 	    segments=new ArrayList<VosSegment>();
+	    channels=new ArrayList<VosChannel>();
     }
     public void Parse()
     {
@@ -86,8 +74,9 @@ public class VosParser
         {
 	        pos=0;
 	        filesize=is.available();
+	        Log.d("parse","filesize:"+filesize+" b=0x"+Integer.toHexString(filesize)+"b");
             pos+=is.read(intbuffer,0,4);
-            header = byte2int(intbuffer);
+            header = VosByte.byte2int(intbuffer);
             if(header!=3)
 	            throw new Exception("not vos file excetion");
             while(true)
@@ -95,6 +84,7 @@ public class VosParser
                 VosSegment this_segment=new VosSegment();
                 pos+=is.read(this_segment.addr,0,4);
                 pos+=is.read(this_segment.name,0,16);
+	            Log.d("parse","segment:"+this_segment.getname()+"addr:0x"+Integer.toHexString(this_segment.getaddr()));
                 if(this_segment.getname().compareTo("EOF")!=0)
                 {
 	                segments.add(this_segment);
@@ -106,72 +96,122 @@ public class VosParser
                 }
             }
 	        //dealing with INF segment here
-	        byte[] length=new byte[1];
+	        byte[] bytebuffer=new byte[1];
 	        byte[] infobuffer=new byte[255];
 
 
 	        //title info
-	        pos+=is.read(length,0,1);
-	        title_lenth=length[0];
-	        if(title_lenth!=0)
+	        pos+=is.read(bytebuffer,0,1);
+	        title_length=bytebuffer[0];
+	        if(title_length!=0)
 	        {
-		        pos += is.read(infobuffer, 0, title_lenth);
+		        pos += is.read(infobuffer, 0, title_length);
 		        title = new String(infobuffer);
 		        title=title.trim();
 	        }
 	        //artist info
-	        pos+=is.read(length,0,1);
-	        artist_lenth=length[0];
-	        if(artist_lenth!=0)
+	        pos+=is.read(bytebuffer,0,1);
+	        artist_length=bytebuffer[0];
+	        if(artist_length!=0)
 	        {
-		        pos += is.read(infobuffer, 0, artist_lenth);
+		        pos += is.read(infobuffer, 0, artist_length);
 		        artist= new String(infobuffer);
 		        artist=artist.trim();
 	        }
 	        //comment
-	        pos+=is.read(length,0,1);
-	        comment_lenth=length[0];
-	        if(comment_lenth!=0)
+	        pos+=is.read(bytebuffer,0,1);
+	        comment_length=bytebuffer[0];
+	        if(comment_length!=0)
 	        {
-		        pos += is.read(infobuffer, 0, comment_lenth);
+		        pos += is.read(infobuffer, 0, comment_length);
 		        comment= new String(infobuffer);
 		        comment=comment.trim();
 	        }
 			//author
-	        pos+=is.read(length,0,1);
-	        author_lenth=length[0];
-	        if(author_lenth!=0)
+	        pos+=is.read(bytebuffer,0,1);
+	        author_length=bytebuffer[0];
+	        if(author_length!=0)
 	        {
-		        pos += is.read(infobuffer, 0, author_lenth);
+		        pos += is.read(infobuffer, 0, author_length);
 		        author= new String(infobuffer);
 		        author=author.trim();
 	        }
 	        //music type
-	        pos+=is.read(length,0,1);
-	        musictype=length[0];
+	        pos+=is.read(bytebuffer,0,1);
+	        musictype=bytebuffer[0];
 
 	        //extended music type
-	        pos+=is.read(length,0,1);
-	        musictype_ex=length[0];
+	        pos+=is.read(bytebuffer,0,1);
+	        musictype_ex=bytebuffer[0];
 
 	        //timelength
 	        pos+=is.read(intbuffer,0,4);
-	        timelength=byte2int(intbuffer);
+	        timelength=VosByte.byte2int(intbuffer);
+			pos+= is.read(bytebuffer,0,1);
+	        level=bytebuffer[0];
+
+	        Log.d("title",title);
+	        Log.d("artist",artist);
+	        Log.d("comment",comment);
+	        Log.d("author",author);
+	        Log.d("musictype",musictype+"");
+	        Log.d("musictype_ex",musictype_ex+"");
+	        Log.d("timelength",timelength+"");
+	        Log.d("level",level+"");
 			//00*1023
 	        for(int i=0;i<1023;i++)
 	        {
-		        pos+=is.read(length,0,1);
-		        if(length[0]!=0)
+		        pos+=is.read(bytebuffer,0,1);
+		        if(bytebuffer[0]!=0)
 		        {
-			        throw new Exception("1023 00 segment, non zero detected at:"+pos);
+			        throw new Exception("1023 00 segment, non zero detected at:"+Integer.toHexString(pos));
 		        }
 	        }
+	        Log.d("parse","after 1023,pos=0x"+Integer.toHexString(pos));
 			/*
             2.INF Segment 轨道信息
-            TODO：完成上一部分以后记得补全这里,参考分析处理这里。
+                1) XX XX XX XX int midi乐器编号
+                2) XX XX XX XX int 本轨道note总数
+                3) 00 * 14 14个字节的00,一说某版本是12字节
+                4) 13* note数，每个note 13字节，note说明见VosNote.java文件
             */
 	        // channel info here
-
+	        while(true)
+	        {
+		        VosChannel channel=new VosChannel();
+		        if(pos>=segments.get(1).getaddr())
+		        {
+			        break;
+		        }
+				pos+=is.read(intbuffer,0,4);
+				channel.instrument=VosByte.byte2int(intbuffer);
+		        pos+=is.read(intbuffer,0,4);
+		        channel.notecount=VosByte.byte2int(intbuffer);
+		        for(int i=0;i<14;i++)
+		        {
+			        pos+=is.read(bytebuffer,0,1);
+			        if(bytebuffer[0]!=0)
+				        throw new Exception("parse channel, 14 00 non zero detected");
+		        }
+		        for(int i=0;i<channel.notecount;i++)
+		        {
+			        VosNote note = new VosNote();
+			        byte[] notebuffer=new byte[13];
+			        pos+=is.read(notebuffer,0,13);
+			        if(pos>segments.get(1).getaddr())
+			        {
+				        throw new Exception("parse notes, addr exception");
+			        }
+			        note.Parse(notebuffer);
+			        channel.notes.add(note);
+		        }
+		        Log.d("parsenote","note"+channel.notes.size()+"parsed");
+		        channels.add(channel);
+		        Log.d("parsechannel","channel"+channels.size()+" parsed");
+	        }
+	        Log.d("parse","after channels,pos=0x"+Integer.toHexString(pos));
+	        //MID segment
+	        //TODO 在这里处理MID segment
         }
         catch (Exception e)
         {

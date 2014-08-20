@@ -17,14 +17,14 @@ public class VosSegment
     }
     public String getname()
     {
-        //TODO:这里注意可能出现的编码问题.
+        //TODO:这里注意可能出现的编码问题 gb2312...
         String rt=new String(name);
 	    rt=rt.trim();
         return rt;
     }
     public Integer getaddr()
     {
-	    int rt = java.nio.ByteBuffer.wrap(addr).order(ByteOrder.LITTLE_ENDIAN).getInt();
+	    int rt =VosByte.byte2int(addr);
         return rt;
     }
 }
