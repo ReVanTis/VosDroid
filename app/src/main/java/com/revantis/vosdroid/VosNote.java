@@ -8,9 +8,9 @@ import java.util.Arrays;
 public class VosNote {
 	public int sequencer;
 	public int duration;
-	public int channel;
-	public int pitch;
-	public int volume;
+	public byte channel;
+	public byte pitch;
+	public byte volume;
 	public byte keyboard;
 	public byte type;
 	public void Parse(byte[] raw) throws Exception
@@ -34,8 +34,8 @@ public class VosNote {
 			// Bit 7: set for notes played by the user
 			// Bit 8: set for long notes
 			*/
-			byte[] seq=Arrays.copyOfRange(raw,0,3);
-			byte[] dur=Arrays.copyOfRange(raw,4,7);
+			byte[] seq=Arrays.copyOfRange(raw,0,4);
+			byte[] dur=Arrays.copyOfRange(raw,4,8);
 			sequencer=VosByte.byte2int(seq);
 			duration=VosByte.byte2int(dur);
 			channel=raw[8];

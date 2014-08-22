@@ -84,10 +84,14 @@ public class VosParser
                 VosSegment this_segment=new VosSegment();
                 pos+=is.read(this_segment.addr,0,4);
                 pos+=is.read(this_segment.name,0,16);
-	            Log.d("parse","segment:"+this_segment.getname()+"addr:0x"+Integer.toHexString(this_segment.getaddr()));
+	            Log.d("parse","segment:"+this_segment.getname().trim()+"addr:0x"+Integer.toHexString(this_segment.getaddr()));
                 if(this_segment.getname().compareTo("EOF")!=0)
                 {
 	                segments.add(this_segment);
+	                if((this_segment.name[0]==(byte)0xB1&&this_segment.name[1]==(byte)0xE0&&this_segment.name[2]==(byte)0xD0&&this_segment.name[3]==(byte)0xB4))
+	                {
+						break;
+	                }
                 }
 	            else
                 {
@@ -212,6 +216,7 @@ public class VosParser
 	        Log.d("parse","after channels,pos=0x"+Integer.toHexString(pos));
 	        //MID segment
 	        //TODO 在这里处理MID segment
+
         }
         catch (Exception e)
         {
