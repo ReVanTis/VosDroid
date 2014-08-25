@@ -1,4 +1,4 @@
-![Image text](http://raw.github.com/revantis/VosDroid/master/app/src/main/res/drawable-xhdpi/ic_launcher.png)VosDroid
+![Image text](http://raw.github.com/revantis/VosDroid/master/android/res/drawable-xhdpi/ic_launcher.png)VosDroid
 ========
 
 An android implementation of an old fasioned music game "Virtual Orchestra Studio (VOS) " which was originally developed by HanseulSoft.
