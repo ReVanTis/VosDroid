@@ -1,8 +1,13 @@
 package com.revantis.vosdroid;
 import android.util.Log;
 
+import com.leff.midi.MidiFile;
+import com.leff.midi.MidiTrack;
+import com.leff.midi.event.MidiEvent;
+import com.leff.midi.event.NoteOn;
+import com.leff.midi.event.ProgramChange;
+
 import java.io.*;
-import java.nio.ByteOrder;
 import java.util.*;
 
 /**
@@ -13,31 +18,38 @@ public class VosParser
 {
 
     public InputStream is;
-    public List<VosSegment> segments;
-	public List<VosChannel> channels;
-    public String title="empyt";
-    private int title_length;
-    public String artist="empyt";
-    private int artist_length;
-	public String comment="empyt";
-	private int comment_length;
-    public String author="empyt";
-    private int author_length;
-	int filesize;
-    int header;
-	int pos;
-	int musictype;
-	int musictype_ex;
-	int timelength;
-	int level;
+    public List<VosSegment> Segments;
+	public List<VosChannel> Channels;
+    public String Title ="empyt";
+    private int TitleLength;
+    public String Artist ="empyt";
+    private int ArtistLength;
+	public String Comment ="empyt";
+	private int CommentLength;
+    public String Author ="empyt";
+    private int AuthorLength;
+	int VosFileSize;
+    int Header;
+	int Pos;
+	int MusicType;
+	int MusicTypeEx;
+	int VosTimeLength;
+	int Level;
+	public MidiFile midiFile;
     public VosParser(InputStream in)
     {
 	    is=in;
-	    segments=new ArrayList<VosSegment>();
-	    channels=new ArrayList<VosChannel>();
+	    Segments =new ArrayList<VosSegment>();
+	    Channels =new ArrayList<VosChannel>();
     }
+	public void SaveMidiFile(File midiFileToWrite) throws  Exception
+	{
+
+		midiFile.writeToFile(midiFileToWrite);
+	}
     public void Parse()
     {
+	    //TODO:此处的转换考虑采用多线程完成，提高性能和界面响应性
         /*流程可以概括如下
         I.4字节03 00 00 00头部
         II.Segments
@@ -72,22 +84,22 @@ public class VosParser
         byte[] intbuffer=new byte[4];
         try
         {
-	        pos=0;
-	        filesize=is.available();
-	        Log.d("parse","filesize:"+filesize+" b=0x"+Integer.toHexString(filesize)+"b");
-            pos+=is.read(intbuffer,0,4);
-            header = VosByte.byte2int(intbuffer);
-            if(header!=3)
+	        Pos =0;
+	        VosFileSize =is.available();
+	        Log.d("parse","filesize:"+ VosFileSize +" b=0x"+Integer.toHexString(VosFileSize)+"b");
+            Pos +=is.read(intbuffer,0,4);
+            Header = VosByte.byte2int(intbuffer);
+            if(Header !=3)
 	            throw new Exception("not vos file excetion");
             while(true)
             {
                 VosSegment this_segment=new VosSegment();
-                pos+=is.read(this_segment.addr,0,4);
-                pos+=is.read(this_segment.name,0,16);
+                Pos +=is.read(this_segment.addr,0,4);
+                Pos +=is.read(this_segment.name,0,16);
 	            Log.d("parse","segment:"+this_segment.getname().trim()+"addr:0x"+Integer.toHexString(this_segment.getaddr()));
                 if(this_segment.getname().compareTo("EOF")!=0)
                 {
-	                segments.add(this_segment);
+	                Segments.add(this_segment);
 	                if((this_segment.name[0]==(byte)0xB1&&this_segment.name[1]==(byte)0xE0&&this_segment.name[2]==(byte)0xD0&&this_segment.name[3]==(byte)0xB4))
 	                {
 						break;
@@ -95,7 +107,7 @@ public class VosParser
                 }
 	            else
                 {
-	                segments.add(this_segment);
+	                Segments.add(this_segment);
 	                break;
                 }
             }
@@ -105,73 +117,73 @@ public class VosParser
 
 
 	        //title info
-	        pos+=is.read(bytebuffer,0,1);
-	        title_length=bytebuffer[0];
-	        if(title_length!=0)
+	        Pos +=is.read(bytebuffer,0,1);
+	        TitleLength =bytebuffer[0];
+	        if(TitleLength !=0)
 	        {
-		        pos += is.read(infobuffer, 0, title_length);
-		        title = new String(infobuffer);
-		        title=title.trim();
+		        Pos += is.read(infobuffer, 0, TitleLength);
+		        Title = new String(infobuffer);
+		        Title = Title.trim();
 	        }
 	        //artist info
-	        pos+=is.read(bytebuffer,0,1);
-	        artist_length=bytebuffer[0];
-	        if(artist_length!=0)
+	        Pos +=is.read(bytebuffer,0,1);
+	        ArtistLength =bytebuffer[0];
+	        if(ArtistLength !=0)
 	        {
-		        pos += is.read(infobuffer, 0, artist_length);
-		        artist= new String(infobuffer);
-		        artist=artist.trim();
+		        Pos += is.read(infobuffer, 0, ArtistLength);
+		        Artist = new String(infobuffer);
+		        Artist = Artist.trim();
 	        }
 	        //comment
-	        pos+=is.read(bytebuffer,0,1);
-	        comment_length=bytebuffer[0];
-	        if(comment_length!=0)
+	        Pos +=is.read(bytebuffer,0,1);
+	        CommentLength =bytebuffer[0];
+	        if(CommentLength !=0)
 	        {
-		        pos += is.read(infobuffer, 0, comment_length);
-		        comment= new String(infobuffer);
-		        comment=comment.trim();
+		        Pos += is.read(infobuffer, 0, CommentLength);
+		        Comment = new String(infobuffer);
+		        Comment = Comment.trim();
 	        }
 			//author
-	        pos+=is.read(bytebuffer,0,1);
-	        author_length=bytebuffer[0];
-	        if(author_length!=0)
+	        Pos +=is.read(bytebuffer,0,1);
+	        AuthorLength =bytebuffer[0];
+	        if(AuthorLength !=0)
 	        {
-		        pos += is.read(infobuffer, 0, author_length);
-		        author= new String(infobuffer);
-		        author=author.trim();
+		        Pos += is.read(infobuffer, 0, AuthorLength);
+		        Author = new String(infobuffer);
+		        Author = Author.trim();
 	        }
 	        //music type
-	        pos+=is.read(bytebuffer,0,1);
-	        musictype=bytebuffer[0];
+	        Pos +=is.read(bytebuffer,0,1);
+	        MusicType =bytebuffer[0];
 
 	        //extended music type
-	        pos+=is.read(bytebuffer,0,1);
-	        musictype_ex=bytebuffer[0];
+	        Pos +=is.read(bytebuffer,0,1);
+	        MusicTypeEx =bytebuffer[0];
 
 	        //timelength
-	        pos+=is.read(intbuffer,0,4);
-	        timelength=VosByte.byte2int(intbuffer);
-			pos+= is.read(bytebuffer,0,1);
-	        level=bytebuffer[0];
+	        Pos +=is.read(intbuffer,0,4);
+	        VosTimeLength=VosByte.byte2int(intbuffer);
+			Pos += is.read(bytebuffer,0,1);
+	        Level =bytebuffer[0];
 
-	        Log.d("title",title);
-	        Log.d("artist",artist);
-	        Log.d("comment",comment);
-	        Log.d("author",author);
-	        Log.d("musictype",musictype+"");
-	        Log.d("musictype_ex",musictype_ex+"");
-	        Log.d("timelength",timelength+"");
-	        Log.d("level",level+"");
+	        Log.d("title", Title);
+	        Log.d("artist", Artist);
+	        Log.d("comment", Comment);
+	        Log.d("author", Author);
+	        Log.d("musictype", MusicType +"");
+	        Log.d("musictype_ex", MusicTypeEx +"");
+	        Log.d("timelength",VosTimeLength+"");
+	        Log.d("level", Level +"");
 			//00*1023
 	        for(int i=0;i<1023;i++)
 	        {
-		        pos+=is.read(bytebuffer,0,1);
+		        Pos +=is.read(bytebuffer,0,1);
 		        if(bytebuffer[0]!=0)
 		        {
-			        throw new Exception("1023 00 segment, non zero detected at:"+Integer.toHexString(pos));
+			        throw new Exception("1023 00 segment, non zero detected at:"+Integer.toHexString(Pos));
 		        }
 	        }
-	        Log.d("parse","after 1023,pos=0x"+Integer.toHexString(pos));
+	        Log.d("parse","after 1023,pos=0x"+Integer.toHexString(Pos));
 			/*
             2.INF Segment 轨道信息
                 1) XX XX XX XX int midi乐器编号
@@ -183,17 +195,17 @@ public class VosParser
 	        while(true)
 	        {
 		        VosChannel channel=new VosChannel();
-		        if(pos>=segments.get(1).getaddr())
+		        if(Pos >= Segments.get(1).getaddr())
 		        {
 			        break;
 		        }
-				pos+=is.read(intbuffer,0,4);
+				Pos +=is.read(intbuffer,0,4);
 				channel.instrument=VosByte.byte2int(intbuffer);
-		        pos+=is.read(intbuffer,0,4);
+		        Pos +=is.read(intbuffer,0,4);
 		        channel.notecount=VosByte.byte2int(intbuffer);
 		        for(int i=0;i<14;i++)
 		        {
-			        pos+=is.read(bytebuffer,0,1);
+			        Pos +=is.read(bytebuffer,0,1);
 			        if(bytebuffer[0]!=0)
 				        throw new Exception("parse channel, 14 00 non zero detected");
 		        }
@@ -201,8 +213,8 @@ public class VosParser
 		        {
 			        VosNote note = new VosNote();
 			        byte[] notebuffer=new byte[13];
-			        pos+=is.read(notebuffer,0,13);
-			        if(pos>segments.get(1).getaddr())
+			        Pos +=is.read(notebuffer,0,13);
+			        if(Pos > Segments.get(1).getaddr())
 			        {
 				        throw new Exception("parse notes, addr exception");
 			        }
@@ -210,17 +222,59 @@ public class VosParser
 			        channel.notes.add(note);
 		        }
 		        Log.d("parsenote","note"+channel.notes.size()+"parsed");
-		        channels.add(channel);
-		        Log.d("parsechannel","channel"+channels.size()+" parsed");
+		        Channels.add(channel);
+		        Log.d("parsechannel","channel"+ Channels.size()+" parsed");
 	        }
-	        Log.d("parse","after channels,pos=0x"+Integer.toHexString(pos));
+	        Log.d("parse","after channels,pos=0x"+Integer.toHexString(Pos));
 	        //MID segment
 	        //TODO 在这里处理MID segment
-
+	        //生成临时文件，供midi库调用。
+	        int MidiHeaderLength=is.available();
+	        byte[] MidiHeaderByte=new byte[MidiHeaderLength];
+			Pos+=is.read(MidiHeaderByte,0,MidiHeaderLength);
+	        ByteArrayInputStream MidiHeaderByteStream=new ByteArrayInputStream(MidiHeaderByte);
+			midiFile=new MidiFile(MidiHeaderByteStream);
+	        for(int i=0;i<16;i++)//16 = total channels
+	        {
+		        long deltatimeticks=midiFile.getResolution();
+		        if(Channels.get(i).notecount==0)
+			        continue;
+		        else
+		        {
+			        VosChannel tempChannel = Channels.get(i);
+			        class sortBySequencer implements Comparator<VosNote>
+			        {
+				        @Override
+				        public int compare(VosNote vosNote, VosNote vosNote2) {
+					        if(vosNote.sequencer>=vosNote2.sequencer)
+						        return 1;
+					        else return -1;
+				        }
+			        }
+			        Collections.sort(tempChannel.notes,new sortBySequencer());
+			        MidiTrack midiTrack =new MidiTrack();
+			        MidiEvent changeInstrument = new ProgramChange(0,i,tempChannel.instrument);
+			        midiTrack.insertEvent(changeInstrument);
+			        for(int j=0;j<tempChannel.notes.size();j++)
+			        {
+				        VosNote NoteToConvert = Channels.get(i).notes.get(j);
+				        long thisNotedeltatime = (((NoteToConvert.sequencer*deltatimeticks)%0x300==0)?0:1)
+						        + NoteToConvert.sequencer* deltatimeticks/0x300;
+				        long thisNoteDuration = (((NoteToConvert.duration* deltatimeticks)%0x2E4==0)?0:1)
+				                + NoteToConvert.duration*deltatimeticks /0x2E4;
+				        MidiEvent thisNoteOn=new NoteOn(thisNotedeltatime,NoteToConvert.channel,NoteToConvert.pitch,NoteToConvert.volume);
+				        MidiEvent thisNoteOff=new NoteOn(thisNotedeltatime+thisNoteDuration,NoteToConvert.channel,NoteToConvert.pitch,0/*NoteToConvert.volume*/);
+				        midiTrack.insertEvent(thisNoteOn);
+				        midiTrack.insertEvent(thisNoteOff);
+			        }
+			        midiFile.addTrack(midiTrack);
+		        }
+	        }
         }
         catch (Exception e)
         {
 			Log.e("parse:",e.getMessage());
         }
     }
+
 }

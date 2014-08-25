@@ -9,9 +9,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.Iterator;
+
 
 
 public class VosDroidMain extends Activity {
@@ -27,10 +28,13 @@ public class VosDroidMain extends Activity {
 		    public void onClick(View view)
 		    {
 			    try {
-				    File file = new File(Environment.getExternalStorageDirectory()+"/test.vos");
+				    File file = new File(Environment.getExternalStorageDirectory()+"/Canon in D.vos");
+				    File midiFileToWrite = new File(Environment.getExternalStorageDirectory()+"/done1.mid");
 				    VosParser vosp=new VosParser(new FileInputStream(file));
 				    Log.i("init","sucess");
 				    vosp.Parse();
+				    vosp.SaveMidiFile(midiFileToWrite);
+
 			    }
 			    catch (Exception e)
 			    {
