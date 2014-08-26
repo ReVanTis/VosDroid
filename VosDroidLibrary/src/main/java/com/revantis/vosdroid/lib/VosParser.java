@@ -41,12 +41,17 @@ public class VosParser
 	    Segments =new ArrayList<VosSegment>();
 	    Channels =new ArrayList<VosChannel>();
     }
+	public VosParser(File in) throws FileNotFoundException
+	{
+		is=new FileInputStream(in);
+		Segments =new ArrayList<VosSegment>();
+		Channels =new ArrayList<VosChannel>();
+	}
 	public void SaveMidiFile(File midiFileToWrite) throws  Exception
 	{
-
 		midiFile.writeToFile(midiFileToWrite);
 	}
-    public void Parse()
+    public void Parse() throws Exception
     {
 	    //TODO:此处的转换考虑采用多线程完成，提高性能和界面响应性
         /*流程可以概括如下
@@ -258,6 +263,7 @@ public class VosParser
         }
         catch (Exception e)
         {
+	        throw e;
         }
     }
 

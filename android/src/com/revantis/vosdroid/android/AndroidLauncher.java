@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.revantis.vosdroid.MidiPlayer;
 import com.revantis.vosdroid.VosDroidGame;
 
 public class AndroidLauncher extends AndroidApplication {
@@ -11,6 +12,7 @@ public class AndroidLauncher extends AndroidApplication {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
-		initialize(new VosDroidGame(), config);
+		MidiPlayer midiPlayer = new AndroidMidiPlayer(getApplicationContext());
+		initialize(new VosDroidGame(midiPlayer), config);
 	}
 }
