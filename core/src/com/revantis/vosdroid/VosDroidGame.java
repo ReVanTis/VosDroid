@@ -15,14 +15,16 @@ public class VosDroidGame extends ApplicationAdapter {
 	MidiPlayer midiPlayer;
 	String vosFilePath;
 	Object MusicReady=new Object();
+	String filePath;
 	public VosDroidGame ( )
 	{
 		super();
 	}
-	public VosDroidGame (MidiPlayer _midiPlayer)
+	public VosDroidGame (MidiPlayer _midiPlayer,String path)
 	{
 		super();
 		midiPlayer=_midiPlayer;
+		filePath=path;
 	}
 	@Override
 	public void create () {
@@ -35,8 +37,8 @@ public class VosDroidGame extends ApplicationAdapter {
 			@Override
 			public synchronized void run() {
 				vosFilePath="vos/";
-				FileHandle vosFile=Gdx.files.external(vosFilePath+"Canon in D.vos");
-				FileHandle midFile=Gdx.files.external(vosFilePath+"Canon in D.mid");
+				FileHandle vosFile=new FileHandle(filePath);
+				FileHandle midFile=new FileHandle(filePath.replace(".vos",".mid"));
 				try
 				{
 					Gdx.app.log("d","parserThread:start parse");
@@ -49,7 +51,6 @@ public class VosDroidGame extends ApplicationAdapter {
 					synchronized (MusicReady) {
 						MusicReady.notifyAll();
 					}
-
 				}
 				catch (Exception e)
 				{
@@ -57,6 +58,7 @@ public class VosDroidGame extends ApplicationAdapter {
 				}
 			}
 		});
+		if(filePath!=null)
 		parserThread.start();
 		Thread midiThread = new Thread(new Runnable() {
 			@Override
@@ -67,7 +69,7 @@ public class VosDroidGame extends ApplicationAdapter {
 						MusicReady.wait();
 					}
 					Gdx.app.log("d","playerThread:opening");
-					midiPlayer.open(Gdx.files.getExternalStoragePath()+"vos/Canon in D.mid");
+					midiPlayer.open(filePath.replace(".vos",".mid"));
 					Gdx.app.log("d","playerThread:playing");
 					midiPlayer.play();
 				}
@@ -75,12 +77,11 @@ public class VosDroidGame extends ApplicationAdapter {
 				{
 					Gdx.app.log("e","playerThread:exception occured");
 				}
-
 			}
 		});
+		if(filePath!=null)
 		midiThread.start();
 	}
-
 	@Override
 	public void render () {
 		Gdx.gl.glClearColor(1, 0, 0, 1);
@@ -88,6 +89,5 @@ public class VosDroidGame extends ApplicationAdapter {
 		batch.begin();
 		batch.draw(img, 0, 0);
 		batch.end();
-
 	}
 }

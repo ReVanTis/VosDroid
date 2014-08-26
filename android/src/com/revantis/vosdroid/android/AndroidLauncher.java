@@ -13,6 +13,15 @@ public class AndroidLauncher extends AndroidApplication {
 		super.onCreate(savedInstanceState);
 		AndroidApplicationConfiguration config = new AndroidApplicationConfiguration();
 		MidiPlayer midiPlayer = new AndroidMidiPlayer(getApplicationContext());
-		initialize(new VosDroidGame(midiPlayer), config);
+		String vosPath=null;
+		try {
+			vosPath = getIntent().getData().getPath();
+		}
+		catch (Exception e)
+		{
+
+		}
+		initialize(new VosDroidGame(midiPlayer, vosPath), config);
+
 	}
 }
