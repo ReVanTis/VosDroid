@@ -20,3 +20,5 @@ Due to the lack of midi support on android platform, the game will mostly not su
 0.2 完成对vos文件的解析
 
 0.3 完成从vos到mid文件的转换（lots of thanks to LeffelMania's [android-midi-lib] (https://github.com/LeffelMania/android-midi-lib) )
+
+0.4 迁移到libgdx的界面上，释放0.4版本供测试人员进行测试。
