@@ -6,12 +6,16 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.revantis.vosdroid.lib.*;
 
 
 public class VosDroidGame extends ApplicationAdapter {
 	SpriteBatch batch;
 	Texture img;
+	Texture instrument_texture;
+	Texture note_texutre;
 	MidiPlayer midiPlayer;
 	String vosFilePath;
 	Object MusicReady=new Object();
@@ -31,7 +35,12 @@ public class VosDroidGame extends ApplicationAdapter {
 
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
+		instrument_texture = new Texture("instrument.png");
+		note_texutre = new Texture("note.png");
+		double scaler_width=Gdx.graphics.getWidth()/instrument_texture.getWidth();
+		double scaler_height=Gdx.graphics.getHeight()/instrument_texture.getHeight();
 
+		double note_width=note_texutre.getWidth()*Gdx.graphics.getWidth()/instrument_texture.getWidth();
 
 		Thread parserThread = new Thread(new Runnable() {
 			@Override
@@ -69,8 +78,8 @@ public class VosDroidGame extends ApplicationAdapter {
 						MusicReady.wait();
 					}
 					Gdx.app.log("d","playerThread:opening");
-					midiPlayer.open(filePath.replace(".vos",".mid"));
-					Gdx.app.log("d","playerThread:playing");
+					midiPlayer.open(filePath.replace(".vos", ".mid"));
+					Gdx.app.log("d", "playerThread:playing");
 					midiPlayer.play();
 				}
 				catch (Exception e)
@@ -84,10 +93,10 @@ public class VosDroidGame extends ApplicationAdapter {
 	}
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		batch.begin();
-		batch.draw(img, 0, 0);
+		batch.draw(instrument_texture, 0, 0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 		batch.end();
 	}
 }

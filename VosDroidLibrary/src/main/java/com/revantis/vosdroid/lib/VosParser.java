@@ -99,17 +99,13 @@ public class VosParser
                 VosSegment this_segment=new VosSegment();
                 Pos +=is.read(this_segment.addr,0,4);
                 Pos +=is.read(this_segment.name,0,16);
-                if(this_segment.getname().compareTo("EOF")!=0)
+	            Segments.add(this_segment);
+                if(this_segment.getname().charAt(0)=='E'&&this_segment.getname().charAt(1)=='O'&&this_segment.getname().charAt(2)=='F')
                 {
-	                Segments.add(this_segment);
-	                if((this_segment.name[0]==(byte)0xB1&&this_segment.name[1]==(byte)0xE0&&this_segment.name[2]==(byte)0xD0&&this_segment.name[3]==(byte)0xB4))
-	                {
-						break;
-	                }
+	                break;
                 }
-	            else
+	            else if((this_segment.name[0]==(byte)0xB1&&this_segment.name[1]==(byte)0xE0&&this_segment.name[2]==(byte)0xD0&&this_segment.name[3]==(byte)0xB4))
                 {
-	                Segments.add(this_segment);
 	                break;
                 }
             }
