@@ -3,7 +3,7 @@
 
 An android implementation of an old fasioned music game "Virtual Orchestra Studio (VOS) " which was originally developed by HanseulSoft.
 
-Due to the lack of midi support on android platform, the game will unlikely support notes with sounds, the music will play along whether you tap or not.
+Due to the lack of midi support on android platform, the game will unlikely supports note with sounds, the music will play along whether you tap or not.
 
 ========
 
