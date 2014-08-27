@@ -11,7 +11,7 @@ import java.io.IOException;
 
 public class AndroidMidiPlayer implements MidiPlayer {
 
-	private MediaPlayer mediaPlayer;
+	public MediaPlayer mediaPlayer;
 	private Context context;
 	private boolean looping;
 	private float volume;
@@ -19,7 +19,6 @@ public class AndroidMidiPlayer implements MidiPlayer {
 	public AndroidMidiPlayer(Context context) {
 		this.context = context;
 		this.mediaPlayer = new MediaPlayer();
-
 		this.looping = false;
 		this.volume = 1;
 	}
@@ -78,5 +77,15 @@ public class AndroidMidiPlayer implements MidiPlayer {
 
 	public void setVolume(float volume) {
 		mediaPlayer.setVolume(volume, volume);
+	}
+
+	public int getDuration()
+	{
+		return this.mediaPlayer.getDuration();
+	}
+
+	public int getCurrentPosistion()
+	{
+		return this.mediaPlayer.getCurrentPosition();
 	}
 }

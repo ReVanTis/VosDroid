@@ -14,4 +14,6 @@ public interface MidiPlayer {
 	public void release();
 	public boolean isPlaying();
 	public void setVolume(float volume);
+	public int getDuration();
+	public int getCurrentPosistion();
 }

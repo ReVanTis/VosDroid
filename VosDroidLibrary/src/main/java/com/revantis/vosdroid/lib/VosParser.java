@@ -5,6 +5,7 @@ import com.leff.midi.MidiTrack;
 import com.leff.midi.event.MidiEvent;
 import com.leff.midi.event.NoteOn;
 import com.leff.midi.event.ProgramChange;
+import com.leff.midi.event.meta.Tempo;
 
 import java.io.*;
 import java.util.*;
@@ -35,17 +36,23 @@ public class VosParser
 	int VosTimeLength;
 	int Level;
 	public MidiFile midiFile;
+	public List<VosPlayNote> playNote;
+	public List<Double> Tick2MS;
+	public void init()
+	{
+		Segments =new ArrayList<VosSegment>();
+		Channels =new ArrayList<VosChannel>();
+		playNote = new ArrayList<VosPlayNote>();
+	}
     public VosParser(InputStream in)
     {
+	    init();
 	    is=in;
-	    Segments =new ArrayList<VosSegment>();
-	    Channels =new ArrayList<VosChannel>();
     }
 	public VosParser(File in) throws FileNotFoundException
 	{
+		init();
 		is=new FileInputStream(in);
-		Segments =new ArrayList<VosSegment>();
-		Channels =new ArrayList<VosChannel>();
 	}
 	public void SaveMidiFile(File midiFileToWrite) throws  Exception
 	{
@@ -53,7 +60,6 @@ public class VosParser
 	}
     public void Parse() throws Exception
     {
-	    //TODO:此处的转换考虑采用多线程完成，提高性能和界面响应性
         /*流程可以概括如下
         I.4字节03 00 00 00头部
         II.Segments
@@ -213,13 +219,51 @@ public class VosParser
 		        Channels.add(channel);
 	        }
 	        //MID segment
-	        //TODO 在这里处理MID segment
 	        //生成临时文件，供midi库调用。
 	        int MidiHeaderLength=is.available();
 	        byte[] MidiHeaderByte=new byte[MidiHeaderLength];
 			Pos+=is.read(MidiHeaderByte,0,MidiHeaderLength);
 	        ByteArrayInputStream MidiHeaderByteStream=new ByteArrayInputStream(MidiHeaderByte);
 			midiFile=new MidiFile(MidiHeaderByteStream);
+	        //TODO:get all TEMPO event here;
+	        List<Tempo> tempoEvent=new ArrayList<Tempo>();
+			for(int i=0;i<midiFile.getTracks().size();i++)
+			{
+				Iterator<MidiEvent> it=midiFile.getTracks().get(i).getEvents().iterator();
+				while(it.hasNext())
+				{
+					MidiEvent tempEvent=it.next();
+					if(tempEvent instanceof Tempo)
+					{
+						tempoEvent.add((Tempo)tempEvent);
+					}
+				}
+			}
+
+	        Tick2MS = new ArrayList<Double>();
+	        double curentMS=0;
+	        for(long i=0;i<midiFile.getLengthInTicks();i++)
+	        {
+		        int j=0;
+		        for(;j<=tempoEvent.size();j++)
+		        {
+			        if(j==tempoEvent.size())
+			        {
+				        double ms=VosByte.getTickPerMS(midiFile.getResolution(),tempoEvent.get(j-1).getMpqn());
+				        curentMS+=ms;
+				        Tick2MS.add(curentMS);
+				        break;
+			        }
+			        if(i<tempoEvent.get(j).getTick())
+			        {
+				        double ms=VosByte.getTickPerMS(midiFile.getResolution(),tempoEvent.get(j-1).getMpqn());
+				        curentMS+=ms;
+				        Tick2MS.add(curentMS);
+				        break;
+			        }
+		        }
+	        }
+
 	        for(int i=0;i<16;i++)//16 = total channels
 	        {
 		        long deltatimeticks=midiFile.getResolution();
@@ -255,6 +299,33 @@ public class VosParser
 			        }
 			        midiFile.addTrack(midiTrack);
 		        }
+	        }
+	        class sortBySequencer implements Comparator<VosNote>
+	        {
+		        @Override
+		        public int compare(VosNote vosNote, VosNote vosNote2) {
+			        if(vosNote.sequencer>=vosNote2.sequencer)
+				        return 1;
+			        else return -1;
+		        }
+	        }
+	        Collections.sort(Channels.get(16).notes,new sortBySequencer());
+
+	        for(int i=0;i<Channels.get(16).notes.size();i++)
+	        {
+		        playNote.add(new VosPlayNote(Channels.get(16).notes.get(i)));
+	        }
+	        for(int i=0;i<playNote.size();i++)
+	        {
+		        playNote.get(i).Tranform(midiFile.getResolution());
+		        int notetime=(int)playNote.get(i).TimeinTick;
+		        int notedur=(int) (playNote.get(i).TimeinTick+playNote.get(i).DurationTimeinTick);
+		        if(notetime>=midiFile.getLengthInTicks())
+			        notetime=(int)midiFile.getLengthInTicks()-1;
+		        if(notedur+notetime>=midiFile.getLengthInTicks())
+			        notedur=(int)midiFile.getLengthInTicks()-1-notetime;
+		        playNote.get(i).Time=Tick2MS.get(notetime);
+		        playNote.get(i).DurationTime=Tick2MS.get(notetime+notedur)-playNote.get(i).Time;
 	        }
         }
         catch (Exception e)
