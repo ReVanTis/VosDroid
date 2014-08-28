@@ -22,3 +22,5 @@ Due to the lack of midi support on android platform, the game will unlikely supp
 0.3 完成从vos到mid文件的转换（lots of thanks to LeffelMania's [android-midi-lib] (https://github.com/LeffelMania/android-midi-lib) )
 
 0.4 迁移到libgdx的界面上，释放0.4版本供测试人员进行测试。
+
+0.5 对原始版本的vos谱面可以进行播放同步预览，暂不支持tempo变换下的速度变化。释放0.5版本供预览。
