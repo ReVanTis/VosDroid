@@ -16,11 +16,10 @@ public class AndroidLauncher extends AndroidApplication {
 		String vosPath=null;
 		try {
 			vosPath = getIntent().getData().getPath();
-			vosPath="/sdcard/vos/Canon in D.vos";//TODO remove when done debug
 		}
 		catch (Exception e)
 		{
-			vosPath="/sdcard/vos/Canon in D.vos";//TODO remove when done debug
+			//vosPath="/sdcard/vos/Canon in D.vos";
 		}
 		initialize(new VosDroidGame(midiPlayer, vosPath), config);
 
