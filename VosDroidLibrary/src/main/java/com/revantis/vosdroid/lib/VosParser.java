@@ -225,7 +225,6 @@ public class VosParser
 			Pos+=is.read(MidiHeaderByte,0,MidiHeaderLength);
 	        ByteArrayInputStream MidiHeaderByteStream=new ByteArrayInputStream(MidiHeaderByte);
 			midiFile=new MidiFile(MidiHeaderByteStream);
-	        //TODO:get all TEMPO event here;
 	        List<Tempo> tempoEvent=new ArrayList<Tempo>();
 			for(int i=0;i<midiFile.getTracks().size();i++)
 			{
