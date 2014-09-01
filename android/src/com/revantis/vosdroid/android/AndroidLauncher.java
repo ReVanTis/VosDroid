@@ -19,7 +19,7 @@ public class AndroidLauncher extends AndroidApplication {
 		}
 		catch (Exception e)
 		{
-			//vosPath="/sdcard/vos/Canon in D.vos";
+			vosPath="/sdcard/vos/5cm1.vos";
 		}
 		initialize(new VosDroidGame(midiPlayer, vosPath), config);
 

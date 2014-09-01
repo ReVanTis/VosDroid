@@ -13,6 +13,7 @@ public class VosNote {
 	public byte volume;
 	public byte keyboard;
 	public byte type;
+
 	public void Parse(byte[] raw) throws Exception
 	{
 		if(raw.length!=13)

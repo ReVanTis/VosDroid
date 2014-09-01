@@ -248,14 +248,30 @@ public class VosParser
 		        {
 			        if(j==tempoEvent.size())
 			        {
-				        double ms=VosByte.getTickPerMS(midiFile.getResolution(),tempoEvent.get(j-1).getMpqn());
+				        double ms;
+				        try {
+
+					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
+				        }
+						catch (ArrayIndexOutOfBoundsException e)
+						{
+							ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);
+						}
 				        curentMS+=ms;
 				        Tick2MS.add(curentMS);
 				        break;
 			        }
 			        if(i<tempoEvent.get(j).getTick())
 			        {
-				        double ms=VosByte.getTickPerMS(midiFile.getResolution(),tempoEvent.get(j-1).getMpqn());
+				        double ms;
+				        try {
+
+					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
+				        }
+				        catch (ArrayIndexOutOfBoundsException e)
+				        {
+					        ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);
+				        }
 				        curentMS+=ms;
 				        Tick2MS.add(curentMS);
 				        break;
@@ -323,8 +339,14 @@ public class VosParser
 			        notetime=(int)midiFile.getLengthInTicks()-1;
 		        if(notedur+notetime>=midiFile.getLengthInTicks())
 			        notedur=(int)midiFile.getLengthInTicks()-1-notetime;
-		        playNote.get(i).Time=Tick2MS.get(notetime);
-		        playNote.get(i).DurationTime=Tick2MS.get(notetime+notedur)-playNote.get(i).Time;
+			    playNote.get(i).Time=Tick2MS.get(notetime);
+				try {
+					playNote.get(i).DurationTime=Tick2MS.get(notetime+notedur)-playNote.get(i).Time;
+				}
+				catch ( ArrayIndexOutOfBoundsException e)
+		        {
+			        playNote.get(i).DurationTime=Tick2MS.get((int)midiFile.getLengthInTicks()-1)-playNote.get(i).Time;
+		        }
 	        }
         }
         catch (Exception e)

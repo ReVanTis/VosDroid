@@ -97,7 +97,8 @@ public class VosDroidGame implements ApplicationListener {
 				}
 				catch (Exception e)
 				{
-					Gdx.app.log("e","parserThread:exception occured:"+e.getMessage());
+					Gdx.app.log("e","parserThread:exception occured:"+e);
+					e.printStackTrace();
 				}
 			}
 		});
@@ -121,7 +122,7 @@ public class VosDroidGame implements ApplicationListener {
 				}
 				catch (Exception e)
 				{
-					Gdx.app.log("e","playerThread:exception occured");
+					Gdx.app.log("e","playerThread:exception occured",e);
 				}
 			}
 		});
@@ -162,8 +163,8 @@ public class VosDroidGame implements ApplicationListener {
 			int tempconnter = 0;
 			for (; tempconnter < vosp.playNote.size(); tempconnter++)
 			{
-				if ((midiPlayedCurrentPostionLastLoop <= (vosp.playNote.get(tempconnter).Time - 2000))
-						&& ((vosp.playNote.get(tempconnter).Time - 2000) < midiPlayedCurrentPostion))
+				if ((midiPlayedCurrentPostionLastLoop <= (vosp.playNote.get(tempconnter).Time - 1000))
+						&& ((vosp.playNote.get(tempconnter).Time - 1000) < midiPlayedCurrentPostion))
 				{
 					Actor tempActor=new Note(vosp.playNote.get(tempconnter),note_texutre);
 					mStage.addActor(tempActor);
@@ -173,7 +174,8 @@ public class VosDroidGame implements ApplicationListener {
 			//Gdx.app.log("d","notesPlayed:"+notesPlayed);
 		}
 		msg.setText(""+midiPlayedCurrentPostion);
-		mStage.act((midiPlayedCurrentPostion-midiPlayedCurrentPostionLastLoop)/1000);
+		//mStage.act((midiPlayedCurrentPostion-midiPlayedCurrentPostionLastLoop)/1000);
+		mStage.act((Gdx.graphics.getDeltaTime()));
 		mStage.draw();
 	}
 	@Override

@@ -23,12 +23,18 @@ public class Note extends Actor
 	{
 		vosNote=tnote;
 		mTexture=nTexture;
-		speed= Gdx.graphics.getHeight()*453f/512f/2f;
-
-		mTextureRegion = new TextureRegion(mTexture, 0, 0, 32, 8);
+		speed= Gdx.graphics.getHeight()*400f/512f/1f;
+		mTextureRegion = new TextureRegion(mTexture, 0, vosNote.Color*8, 32, 8);
 		mSprite = new Sprite(mTextureRegion);
 		scaler = Gdx.graphics.getWidth()/mTexture.getWidth();
-		mSprite.setSize(Gdx.graphics.getWidth()/256f*mSprite.getWidth(),Gdx.graphics.getWidth()/256f*mSprite.getWidth()/4f);
+		if(!vosNote.LongNote)
+		{
+			mSprite.setSize(Gdx.graphics.getWidth()/256f*mSprite.getWidth(),Gdx.graphics.getWidth()/256f*mSprite.getWidth()/4f);
+		}
+		else
+		{
+			mSprite.setSize(Gdx.graphics.getWidth()/256f*mSprite.getWidth(),((float)vosNote.duration)/1000f*speed);
+		}
 		mSprite.setPosition((13f+vosNote.Track*33f)/256f*Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}
 	@Override
