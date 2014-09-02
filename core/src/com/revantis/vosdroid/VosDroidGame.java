@@ -15,15 +15,13 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.revantis.vosdroid.lib.*;
-
-
-
 
 public class VosDroidGame implements ApplicationListener {
 	Stage mStage;
 
-
+	Texture progressbar_texture;
 	Texture instrument_texture;
 	Texture note_texutre;
 	MidiPlayer midiPlayer;
@@ -32,11 +30,13 @@ public class VosDroidGame implements ApplicationListener {
 	String filePath;
 	BitmapFont font;
 	AssetManager assetManager=new AssetManager();
-	int midiPlayedCurrentPostion=-5000;
+	int midiPlayedCurrentPostion=0;
 	int notesPlayed=0;
 	VosParser vosp;
 	Label msg;
-	boolean begun=false;
+	Image bgimg;
+	ProgressBar progressBar;
+	ProgressBarFrame progressBarFrame;
 
 	public VosDroidGame ( )
 	{
@@ -51,24 +51,32 @@ public class VosDroidGame implements ApplicationListener {
 	@Override
 	public void create () {
 		mStage=new Stage();
-
-
-		instrument_texture = new Texture("instrument.png");
-		Image bgimg=new Image(instrument_texture);
-		bgimg.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
-		note_texutre = new Texture("note.png");
-
-
 		assetManager.load("msyahei_en.fnt",BitmapFont.class);
+		assetManager.load("instrument.png", Texture.class);
+		assetManager.load("note.png",Texture.class);
+		assetManager.load("progressbar.png",Texture.class);
 		assetManager.finishLoading();
 		font=assetManager.get("msyahei_en.fnt",BitmapFont.class);
+		instrument_texture=assetManager.get("instrument.png", Texture.class);
+		note_texutre=assetManager.get("note.png",Texture.class);
+		progressbar_texture=assetManager.get("progressbar.png",Texture.class);
 
+		bgimg = new Image(instrument_texture);
+		bgimg.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
 		msg = new Label("init",new Label.LabelStyle(font, Color.BLACK));
-		msg.setFontScale(2);
-		msg.setPosition(Gdx.graphics.getWidth()/2f,Gdx.graphics.getHeight()-200);
+		msg.setAlignment(Align.center);
+		msg.setFontScale(1.5f);
+
+
+		progressBarFrame=new ProgressBarFrame(progressbar_texture);
+		progressBar=new ProgressBar(progressbar_texture);
+		msg.setCenterPosition(Gdx.graphics.getWidth()/2,40);
 
 		mStage.addActor(bgimg);
 		mStage.addActor(msg);
+		mStage.addActor(progressBarFrame);
+		mStage.addActor(progressBar);
+
 
 		double scaler_width=Gdx.graphics.getWidth()/instrument_texture.getWidth();
 		double scaler_height=Gdx.graphics.getHeight()/instrument_texture.getHeight();
@@ -142,22 +150,9 @@ public class VosDroidGame implements ApplicationListener {
 	public void render () {
 		Gdx.gl.glClearColor(1, 1, 1, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		if(!begun)
-		try {
-			synchronized (MusicReady)
-			{
-				MusicReady.wait();
-			}
-			begun=true;
-		}
-		catch (Exception e)
-		{
-			Gdx.app.log("e","render:syn exception");
-		}
 		int midiPlayedCurrentPostionLastLoop=midiPlayedCurrentPostion;//记录上次render时播放的毫秒数
 		if(midiPlayer.isPlaying())
 		{
-
 			midiPlayedCurrentPostionLastLoop = midiPlayedCurrentPostion;
 			midiPlayedCurrentPostion = midiPlayer.getCurrentPosistion();//获取本次render时播放的毫秒数
 			int tempconnter = 0;
@@ -171,10 +166,34 @@ public class VosDroidGame implements ApplicationListener {
 				}
 			}
 			notesPlayed = tempconnter;
-			//Gdx.app.log("d","notesPlayed:"+notesPlayed);
+
+			progressBar.Progress= ( (float)midiPlayedCurrentPostion/(float)midiPlayer.getDuration()*100f);
 		}
-		msg.setText(""+midiPlayedCurrentPostion);
-		//mStage.act((midiPlayedCurrentPostion-midiPlayedCurrentPostionLastLoop)/1000);
+		if(midiPlayedCurrentPostion==0)
+		{
+			if(vosp!=null)
+			{
+				msg.setText(vosp.MessageString);
+				progressBar.Progress=vosp.progress;
+			}
+			else
+			{
+				msg.setText("loading");
+				progressBar.Progress=100;
+			}
+		}
+		else
+		{
+			float t1=midiPlayedCurrentPostion/1000f;
+			float t2=midiPlayer.getDuration()/1000f;
+			msg.setText(String.format("%.2f|%.2f",t1,t2));
+		}
+
+		//msg.setPosition((Gdx.graphics.getWidth() - msg.getWidth()) / 2f, 0);
+		bgimg.toFront();
+		progressBarFrame.toFront();
+		progressBar.toFront();
+		msg.toFront();
 		mStage.act((Gdx.graphics.getDeltaTime()));
 		mStage.draw();
 	}

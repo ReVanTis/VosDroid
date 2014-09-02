@@ -33,7 +33,7 @@ public class Note extends Actor
 		}
 		else
 		{
-			mSprite.setSize(Gdx.graphics.getWidth()/256f*mSprite.getWidth(),((float)vosNote.duration)/1000f*speed);
+			mSprite.setSize(Gdx.graphics.getWidth()/256f*mSprite.getWidth(),((float)vosNote.DurationTime)/1000f*speed);
 		}
 		mSprite.setPosition((13f+vosNote.Track*33f)/256f*Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}

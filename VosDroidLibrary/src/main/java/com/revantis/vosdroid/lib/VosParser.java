@@ -16,7 +16,8 @@ import java.util.*;
  */
 public class VosParser
 {
-
+	public int progress=0;
+	public String MessageString="";
     public InputStream is;
     public List<VosSegment> Segments;
 	public List<VosChannel> Channels;
@@ -90,7 +91,9 @@ public class VosParser
                 10) XX XX XX XX 总时间长度，单位毫秒(ms)，Big Endian int
                 11) 1023字节00
         */
-
+		//parsing vos file
+	    MessageString = "Crafting Cello";
+	    progress=0;
         byte[] intbuffer=new byte[4];
         try
         {
@@ -187,6 +190,7 @@ public class VosParser
                 4) 13* note数，每个note 13字节，note说明见VosNote.java文件
             */
 	        // channel info here
+	        progress=50;
 	        while(true)
 	        {
 		        VosChannel channel=new VosChannel();
@@ -218,6 +222,9 @@ public class VosParser
 		        }
 		        Channels.add(channel);
 	        }
+	        //generating midi file
+	        MessageString = "Calling Orchestra to Come";
+	        progress=0;
 	        //MID segment
 	        //生成临时文件，供midi库调用。
 	        int MidiHeaderLength=is.available();
@@ -238,49 +245,11 @@ public class VosParser
 					}
 				}
 			}
-
-	        Tick2MS = new ArrayList<Double>();
-	        double curentMS=0;
-	        for(long i=0;i<midiFile.getLengthInTicks();i++)
-	        {
-		        int j=0;
-		        for(;j<=tempoEvent.size();j++)
-		        {
-			        if(j==tempoEvent.size())
-			        {
-				        double ms;
-				        try {
-
-					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
-				        }
-						catch (ArrayIndexOutOfBoundsException e)
-						{
-							ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);
-						}
-				        curentMS+=ms;
-				        Tick2MS.add(curentMS);
-				        break;
-			        }
-			        if(i<tempoEvent.get(j).getTick())
-			        {
-				        double ms;
-				        try {
-
-					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
-				        }
-				        catch (ArrayIndexOutOfBoundsException e)
-				        {
-					        ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);
-				        }
-				        curentMS+=ms;
-				        Tick2MS.add(curentMS);
-				        break;
-			        }
-		        }
-	        }
-
+			progress=10;
+			//adding notes to midi
 	        for(int i=0;i<16;i++)//16 = total channels
 	        {
+		        progress+=5;
 		        long deltatimeticks=midiFile.getResolution();
 		        if(Channels.get(i).notecount==0)
 			        continue;
@@ -325,23 +294,73 @@ public class VosParser
 		        }
 	        }
 	        Collections.sort(Channels.get(16).notes,new sortBySequencer());
+	        progress=100;
+			//calibrating time in milliseconds!
+	        MessageString = "Calibrating Show Time with RGO";
+	        progress=0;
+	        Tick2MS = new ArrayList<Double>();
+	        double curentMS=0;
+	        long length=midiFile.getLengthInTicks();
+	        for(long i=0;i<length;i++)
+	        {
+		        progress=(int)((float)i* 100f/(length)*1f );
+		        int j=0;
+		        for(;j<=tempoEvent.size();j++)
+		        {
+			        if(j==tempoEvent.size())
+			        {
+				        double ms;
+				        try {
 
+					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
+				        }
+				        catch (ArrayIndexOutOfBoundsException e)
+				        {
+					        ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);//default tempo=120,mpqn=50,0000
+				        }
+				        curentMS+=ms;
+				        Tick2MS.add(curentMS);
+				        break;
+			        }
+			        if(i<tempoEvent.get(j).getTick())
+			        {
+				        double ms;
+				        try {
+
+					        ms = VosByte.getTickPerMS(midiFile.getResolution(), tempoEvent.get(j - 1).getMpqn());
+				        }
+				        catch (ArrayIndexOutOfBoundsException e)
+				        {
+					        ms=VosByte.getTickPerMS(midiFile.getResolution(), 500000);
+				        }
+				        curentMS+=ms;
+				        Tick2MS.add(curentMS);
+				        break;
+			        }
+		        }
+	        }
+	        //generating notes to play
+	        progress=0;
+	        MessageString = "Handing Out Music Scores to Orchestra";
 	        for(int i=0;i<Channels.get(16).notes.size();i++)
 	        {
+		        progress=(int) ( (i*50f)/Channels.get(16).notes.size());
 		        playNote.add(new VosPlayNote(Channels.get(16).notes.get(i)));
 	        }
 	        for(int i=0;i<playNote.size();i++)
 	        {
+		        progress=50+(int)(i*50f/playNote.size());
 		        playNote.get(i).Tranform(midiFile.getResolution());
-		        int notetime=(int)playNote.get(i).TimeinTick;
-		        int notedur=(int) (playNote.get(i).TimeinTick+playNote.get(i).DurationTimeinTick);
-		        if(notetime>=midiFile.getLengthInTicks())
-			        notetime=(int)midiFile.getLengthInTicks()-1;
-		        if(notedur+notetime>=midiFile.getLengthInTicks())
-			        notedur=(int)midiFile.getLengthInTicks()-1-notetime;
-			    playNote.get(i).Time=Tick2MS.get(notetime);
+		        int NoteStartTick =playNote.get(i).TimeinTick;
+		        if(NoteStartTick>=midiFile.getLengthInTicks())
+			        NoteStartTick=(int)midiFile.getLengthInTicks()-1;
+		        playNote.get(i).Time=Tick2MS.get(NoteStartTick);
+
+		        int NoteEndTick = playNote.get(i).TimeinTick+playNote.get(i).DurationTimeinTick;
+		        if(NoteEndTick>=midiFile.getLengthInTicks())
+			        NoteEndTick=(int)midiFile.getLengthInTicks()-1;
 				try {
-					playNote.get(i).DurationTime=Tick2MS.get(notetime+notedur)-playNote.get(i).Time;
+					playNote.get(i).DurationTime=Tick2MS.get(NoteEndTick)-playNote.get(i).Time;
 				}
 				catch ( ArrayIndexOutOfBoundsException e)
 		        {

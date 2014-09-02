@@ -2,13 +2,14 @@ package com.revantis.vosdroid.lib;
 
 /**
  * Created by ReVanTis on 2014/08/27.
+ * This class is to record note information to play
  */
 public class VosPlayNote extends  VosNote
 {
 	public double Time;
 	public double DurationTime;
-	public long TimeinTick;//in ticks
-	public long DurationTimeinTick;//in ticks
+	public int TimeinTick;//in ticks
+	public int DurationTimeinTick;//in ticks
 	public int Track;
 	public boolean LongNote;
 	public int Color;
@@ -35,7 +36,7 @@ public class VosPlayNote extends  VosNote
 	{
 		super.Parse(raw);
 	}
-	public void Tranform(long resolution)
+	public void Tranform(int resolution)
 	{
 		TimeinTick = (((sequencer*resolution)%0x300==0)?0:1)
 				+ sequencer* resolution/0x300;
