@@ -18,6 +18,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.Align;
 import com.revantis.vosdroid.lib.*;
 
+import java.io.File;
+
 public class VosDroidGame implements ApplicationListener {
 	Stage mStage;
 
@@ -37,20 +39,37 @@ public class VosDroidGame implements ApplicationListener {
 	Image bgimg;
 	ProgressBar progressBar;
 	ProgressBarFrame progressBarFrame;
-
+	FileHandle vosFile;
+	FileHandle midFile;
 	public VosDroidGame ( )
 	{
 		super();
 	}
 	public VosDroidGame (MidiPlayer _midiPlayer,String path)
 	{
+
 		super();
 		midiPlayer=_midiPlayer;
-		filePath=path;
+		filePath = path;
+
 	}
 	@Override
 	public void create () {
+
 		mStage=new Stage();
+
+		if(filePath==null)
+		{
+			filePath=new String("internal file used");
+			vosFile=Gdx.files.internal("Canon in D.vos");
+			midFile = new FileHandle("/sdcard/vos.mid");
+		}
+		else
+		{
+			vosFile = new FileHandle(filePath);
+			midFile = new FileHandle(filePath.replace(".vos", ".mid"));
+		}
+
 		assetManager.load("msyahei_en.fnt",BitmapFont.class);
 		assetManager.load("instrument.png", Texture.class);
 		assetManager.load("note.png",Texture.class);
@@ -66,7 +85,6 @@ public class VosDroidGame implements ApplicationListener {
 		msg = new Label("init",new Label.LabelStyle(font, Color.BLACK));
 		msg.setAlignment(Align.center);
 		msg.setFontScale(1.5f);
-
 
 		progressBarFrame=new ProgressBarFrame(progressbar_texture);
 		progressBar=new ProgressBar(progressbar_texture);
@@ -85,14 +103,12 @@ public class VosDroidGame implements ApplicationListener {
 		Thread parserThread = new Thread(new Runnable() {
 			@Override
 			public synchronized void run() {
-				vosFilePath="vos/";
-				FileHandle vosFile=new FileHandle(filePath);
-				FileHandle midFile=new FileHandle(filePath.replace(".vos",".mid"));
+
 				try
 				{
 					Gdx.app.log("d","parserThread:start parse");
 
-					vosp = new VosParser(vosFile.file());
+					vosp = new VosParser(vosFile.read());
 					Gdx.app.log("d","parserThread:init success");
 					vosp.Parse();
 					Gdx.app.log("d", "parserThread:parsed success");
@@ -122,7 +138,7 @@ public class VosDroidGame implements ApplicationListener {
 						MusicReady.wait();
 					}
 					Gdx.app.log("d", "playerThread:opening");
-					midiPlayer.open(filePath.replace(".vos", ".mid"));
+					midiPlayer.open(midFile.path());
 					Gdx.app.log("d", "playerThread:sleeping");
 					Thread.sleep(500);
 					Gdx.app.log("d", "playerThread:playing");
