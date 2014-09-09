@@ -15,18 +15,20 @@ Due to the lack of midi support on android platform, the game will unlikely supp
 
 目前的版本规划
 
-0.1 initial commit
+(D=done,N=not-done)
 
-0.2 完成对vos文件的解析
+D0.1 initial commit
 
-0.3 完成从vos到mid文件的转换（lots of thanks to LeffelMania's [android-midi-lib] (https://github.com/LeffelMania/android-midi-lib) )
+D0.2 完成对vos文件的解析
 
-0.4 迁移到libgdx的界面上，释放0.4版本供测试人员进行测试。
+D0.3 完成从vos到mid文件的转换（lots of thanks to LeffelMania's [android-midi-lib] (https://github.com/LeffelMania/android-midi-lib) )
 
-0.5 对原始版本的vos谱面可以进行播放同步预览，暂不支持tempo变换下的速度变化。释放0.5版本供预览。
+D0.4 迁移到libgdx的界面上，释放0.4版本供测试人员进行测试。
 
-0.5.1 增加了长条的支持，界面现在可以通过进度条预览载入情况和播放进度。释放0.5.1版本供预览。
+D0.5 对原始版本的vos谱面可以进行播放同步预览，暂不支持tempo变换下的速度变化。释放0.5版本供预览。
 
-0.5.1.1 为按下note的时设计了一个简单的特效。
+D0.5.1 增加了长条的支持，界面现在可以通过进度条预览载入情况和播放进度。释放0.5.1版本供预览。
 
-0.6 完成简单的游戏功能。
+D0.5.1.1 为按下note的时设计了一个简单的特效。
+
+N0.6 完成简单的游戏功能。
