@@ -26,6 +26,7 @@ public class VosDroidGame implements ApplicationListener {
 	Texture progressbar_texture;
 	Texture instrument_texture;
 	Texture note_texutre;
+	Texture circle_texutre;
 	MidiPlayer midiPlayer;
 	String vosFilePath;
 	Object MusicReady=new Object();
@@ -36,9 +37,10 @@ public class VosDroidGame implements ApplicationListener {
 	int notesPlayed=0;
 	VosParser vosp;
 	Label msg;
+	Label fps;
 	Image bgimg;
 	ProgressBar progressBar;
-	ProgressBarFrame progressBarFrame;
+
 	FileHandle vosFile;
 	FileHandle midFile;
 	public VosDroidGame ( )
@@ -69,32 +71,38 @@ public class VosDroidGame implements ApplicationListener {
 			vosFile = new FileHandle(filePath);
 			midFile = new FileHandle(filePath.replace(".vos", ".mid"));
 		}
-
+		assetManager.load("circle.png",Texture.class);
 		assetManager.load("msyahei_en.fnt",BitmapFont.class);
 		assetManager.load("instrument.png", Texture.class);
 		assetManager.load("note.png",Texture.class);
 		assetManager.load("progressbar.png",Texture.class);
 		assetManager.finishLoading();
+
 		font=assetManager.get("msyahei_en.fnt",BitmapFont.class);
 		instrument_texture=assetManager.get("instrument.png", Texture.class);
 		note_texutre=assetManager.get("note.png",Texture.class);
+		circle_texutre=assetManager.get("circle.png",Texture.class);
+
 		progressbar_texture=assetManager.get("progressbar.png",Texture.class);
 
 		bgimg = new Image(instrument_texture);
 		bgimg.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+		fps = new Label("init",new Label.LabelStyle(font, Color.BLACK));
+		fps.setAlignment(Align.right);
 		msg = new Label("init",new Label.LabelStyle(font, Color.BLACK));
 		msg.setAlignment(Align.center);
-		msg.setFontScale(1.5f);
 
-		progressBarFrame=new ProgressBarFrame(progressbar_texture);
+
+
 		progressBar=new ProgressBar(progressbar_texture);
+
 		msg.setCenterPosition(Gdx.graphics.getWidth()/2,40);
 
 		mStage.addActor(bgimg);
 		mStage.addActor(msg);
-		mStage.addActor(progressBarFrame);
 		mStage.addActor(progressBar);
-
+		mStage.addActor(fps);
+		msg.setHeight(progressBar.getHeight());
 
 		double scaler_width=Gdx.graphics.getWidth()/instrument_texture.getWidth();
 		double scaler_height=Gdx.graphics.getHeight()/instrument_texture.getHeight();
@@ -177,7 +185,7 @@ public class VosDroidGame implements ApplicationListener {
 				if ((midiPlayedCurrentPostionLastLoop <= (vosp.playNote.get(tempconnter).Time - 1000))
 						&& ((vosp.playNote.get(tempconnter).Time - 1000) < midiPlayedCurrentPostion))
 				{
-					Actor tempActor=new Note(vosp.playNote.get(tempconnter),note_texutre);
+					Actor tempActor=new Note(vosp.playNote.get(tempconnter),note_texutre,circle_texutre,446f);
 					mStage.addActor(tempActor);
 				}
 			}
@@ -204,12 +212,12 @@ public class VosDroidGame implements ApplicationListener {
 			float t2=midiPlayer.getDuration()/1000f;
 			msg.setText(String.format("%.2f|%.2f",t1,t2));
 		}
-
-		//msg.setPosition((Gdx.graphics.getWidth() - msg.getWidth()) / 2f, 0);
 		bgimg.toFront();
-		progressBarFrame.toFront();
+		fps.setText("fps:"+Gdx.graphics.getFramesPerSecond());
 		progressBar.toFront();
 		msg.toFront();
+		fps.setPosition(Gdx.graphics.getWidth()-fps.getWidth(),Gdx.graphics.getHeight()-fps.getHeight());
+		fps.toFront();
 		mStage.act((Gdx.graphics.getDeltaTime()));
 		mStage.draw();
 	}
