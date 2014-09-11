@@ -5,11 +5,15 @@ An android implementation of an old fasioned music game "Virtual Orchestra Studi
 
 Due to the lack of midi support on android platform, the game will unlikely supports note with sounds, the music will play along whether you tap or not.
 
+[About Usage](https://github.com/ReVanTis/VosDroid/wiki/How-to-use-it%3F)
+
 ========
 
 对VOS这款游戏在安卓上的重建。
 
 由于安卓平台缺乏对于midi单个音符的回放功能，最终的游戏很可能敲键会不带声音，背景音乐会一直播放。
+
+[如何使用](https://github.com/ReVanTis/VosDroid/wiki/How-to-use-it%3F)
 
 ========
 
