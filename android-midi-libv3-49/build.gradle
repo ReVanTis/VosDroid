@@ -1,2 +1,0 @@
-configurations.create("default")
-artifacts.add("default", file('android-midi-libv3-49.jar'))

@@ -7,5 +7,5 @@ eclipse.project {
 }
 dependencies {
     compile project(':VosDroidLibrary')
-    runtime project(':android-midi-libv3-49')
+    compile project(':android-midi-lib')
 }

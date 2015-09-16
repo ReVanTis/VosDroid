@@ -1,1 +1,1 @@
-include 'android', 'core', ':VosDroidLibrary', ':android-midi-libv3-49'
+include 'android', 'core', ':VosDroidLibrary',  ':android-midi-lib'

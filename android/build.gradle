@@ -1,3 +1,6 @@
+dependencies {
+    compile project(':android-midi-lib')
+}
 android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -117,7 +120,4 @@ idea {
             }
         }
     }
-}
-dependencies {
-    runtime project(':android-midi-libv3-49')
 }
